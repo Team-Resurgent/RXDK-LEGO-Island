@@ -1,3 +1,72 @@
+# LEGO Island for the original Xbox
+
+<p align="center"><b>isle-portable on the original Xbox (2001) — LEGO Island running natively on the console, built with the open RXDK SDK</b></p>
+
+<p align="center">
+  <a href="https://github.com/Team-Resurgent/isle-portable/blob/xboxog/LICENSE"><img src="https://img.shields.io/badge/License-LGPLv3-blue.svg" alt="License: LGPL v3"></a>
+  <a href="https://discord.gg/VcdSfajQGK"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord" alt="Discord"></a>
+</p>
+
+<p align="center">
+  <a href="https://ko-fi.com/J3J7L5UMN"><img src="https://img.shields.io/badge/ko--fi-Support-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="ko-fi"></a>
+  <a href="https://www.patreon.com/teamresurgent"><img src="https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white" alt="Patreon"></a>
+</p>
+
+This is Team Resurgent's port of [isle-portable](https://github.com/isledecomp/isle-portable), the portable
+version of LEGO Island built on the [isledecomp](https://github.com/isledecomp/isle) decompilation, to the
+original Xbox. It runs on the console with [RXDK SDL3](https://github.com/Team-Resurgent/RXDK-SDL3) for video,
+audio, controllers and threads.
+
+**Status: work in progress.** The game starts and runs on xemu with the software renderer, which is slow; a
+Direct3D 8 renderer is next. It has not yet been tested on a console.
+
+**An existing copy of LEGO Island is required.**
+
+## Installing the game files
+
+Put the game's `LEGO` folder next to `default.xbe`, combining two folders from the CD:
+
+| From the CD | To, next to `default.xbe` |
+|---|---|
+| `LEGO\Scripts` | `LEGO\Scripts` |
+| `DATA\disk\LEGO\data` | `LEGO\data` |
+
+The title looks for them in `D:\LEGO\` (`D:` is the folder it was launched from). Saves and `isle.ini` go to the
+title's own storage on the hard disk, `T:\isledecomp\isle\`.
+
+## Controls
+
+| Controller | Action |
+|---|---|
+| Right stick, d-pad | Move the cursor |
+| A, right trigger | Click |
+| B | Space |
+| Left stick | Move |
+| Back | Escape (skip) |
+| Start | Pause |
+
+## Building
+
+You need [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.8 or later, and Python 3.
+
+```bash
+python xboxog/gen_manifest.py
+rxdk build --project-root xboxog
+```
+
+`gen_manifest.py` fetches the two dependencies the CMake build downloads (iniparser, and RXDK SDL3 in place of
+SDL3) into `xboxog/deps`, and writes the RXDK build manifests from the project's CMake files. It reads each
+target's source list from CMake and evaluates the `if()` conditions around it for the Xbox; a condition it has no
+value for stops it, so a new platform switch upstream gets decided rather than guessed. Re-run it after upstream
+changes.
+
+The build produces `xboxog/out/Build/isle/default.xbe` and `xboxog/out/XISO/isle.iso` (without the game files).
+
+The Xbox platform is configured as the DOS port is: miniwin with the software renderer, static libraries, and no
+extensions. Its settings are in `ISLE/xboxog/config.cpp`.
+
+---
+
 # LEGO Island, portable
 
 [Development Vlog](https://www.youtube.com/playlist?list=PLbpl-gZkNl2Db4xcAsT_xOfOwRk-2DPHL) | [Contributing](/CONTRIBUTING.md) | [Matrix](https://matrix.to/#/#isledecomp:matrix.org) | [Forums](https://forum.mattkc.com/viewforum.php?f=1) | [Patreon](https://www.patreon.com/mattkc)
