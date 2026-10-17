@@ -3,7 +3,7 @@
 <p align="center"><b>isle-portable on the original Xbox (2001) — LEGO Island running natively on the console, built with the open RXDK SDK</b></p>
 
 <p align="center">
-  <a href="https://github.com/Team-Resurgent/isle-portable/blob/xboxog/LICENSE"><img src="https://img.shields.io/badge/License-LGPLv3-blue.svg" alt="License: LGPL v3"></a>
+  <a href="https://github.com/Team-Resurgent/RXDK-LEGO-Island/blob/xboxog/LICENSE"><img src="https://img.shields.io/badge/License-LGPLv3-blue.svg" alt="License: LGPL v3"></a>
   <a href="https://discord.gg/VcdSfajQGK"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord" alt="Discord"></a>
 </p>
 
