@@ -1,0 +1,30 @@
+{
+  "name": "miniaudio",
+  "type": "library",
+  "configuration": "release",
+  "sources": [
+    "../../../3rdparty/miniaudio/miniaudio.c"
+  ],
+  "publicIncludePaths": [
+    "../../../3rdparty/miniaudio"
+  ],
+  "defines": [
+    "NDEBUG",
+    "MA_ENABLE_ONLY_SPECIFIC_BACKENDS",
+    "MA_NO_DECODING",
+    "MA_NO_ENCODING",
+    "MA_NO_WAV",
+    "MA_NO_FLAC",
+    "MA_NO_MP3",
+    "MA_NO_DEVICE_IO",
+    "MA_NO_RESOURCE_MANAGER",
+    "MA_NO_GENERATION",
+    "MA_NO_THREADING",
+    "MA_NO_RUNTIME_LINKING"
+  ],
+  "compileFlags": [
+    "-U_WIN32"
+  ],
+  "cppStandard": "c++17",
+  "outputDir": "out"
+}

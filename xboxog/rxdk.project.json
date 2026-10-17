@@ -1,0 +1,47 @@
+{
+  "name": "isle",
+  "configuration": "release",
+  "sources": [
+    "../ISLE/isleapp.cpp",
+    "../ISLE/islefiles.cpp",
+    "../ISLE/xboxog/config.cpp"
+  ],
+  "includePaths": [
+    "../ISLE"
+  ],
+  "projectReferences": [
+    "libs/lego1",
+    "libs/miniwin",
+    "libs/iniparser",
+    "libs/libsmacker",
+    "libs/miniaudio",
+    "deps/SDL3"
+  ],
+  "libraries": [
+    "libd3d8.lib",
+    "libdsound.lib",
+    "libxapi.lib",
+    "libcpp.lib",
+    "libc.lib",
+    "libkernel.lib"
+  ],
+  "defines": [
+    "XBOXOG",
+    "MINIWIN",
+    "NDEBUG",
+    "ISLE_APP",
+    "MA_ENABLE_ONLY_SPECIFIC_BACKENDS",
+    "MA_NO_DECODING",
+    "MA_NO_ENCODING",
+    "MA_NO_WAV",
+    "MA_NO_FLAC",
+    "MA_NO_MP3",
+    "MA_NO_DEVICE_IO",
+    "MA_NO_RESOURCE_MANAGER",
+    "MA_NO_GENERATION",
+    "MA_NO_THREADING",
+    "MA_NO_RUNTIME_LINKING"
+  ],
+  "cppStandard": "c++17",
+  "outputDir": "out"
+}

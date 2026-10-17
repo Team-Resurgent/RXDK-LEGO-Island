@@ -81,6 +81,10 @@
 #include "xbox_one_series/config.h"
 #endif
 
+#ifdef XBOXOG
+#include "xboxog/config.h"
+#endif
+
 #ifdef IOS
 #include "ios/config.h"
 #include "ios/filepicker.h"
@@ -1388,6 +1392,9 @@ bool IsleApp::LoadConfig()
 #endif
 #ifdef WINDOWS_STORE
 		XBONE_SetupDefaultConfigOverrides(dict);
+#endif
+#ifdef XBOXOG
+		XBOXOG_SetupDefaultConfigOverrides(dict);
 #endif
 #ifdef IOS
 		IOS_SetupDefaultConfigOverrides(dict);

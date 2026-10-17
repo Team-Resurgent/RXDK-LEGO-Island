@@ -1,0 +1,40 @@
+{
+  "name": "miniwin",
+  "type": "library",
+  "configuration": "release",
+  "sources": [
+    "../../../miniwin/src/windows/windows.cpp",
+    "../../../miniwin/src/ddraw/ddpalette.cpp",
+    "../../../miniwin/src/ddraw/ddraw.cpp",
+    "../../../miniwin/src/ddraw/ddsurface.cpp",
+    "../../../miniwin/src/ddraw/framebuffer.cpp",
+    "../../../miniwin/src/d3drm/d3drm.cpp",
+    "../../../miniwin/src/d3drm/d3drmdevice.cpp",
+    "../../../miniwin/src/d3drm/d3drmframe.cpp",
+    "../../../miniwin/src/d3drm/d3drmlight.cpp",
+    "../../../miniwin/src/d3drm/d3drmmesh.cpp",
+    "../../../miniwin/src/d3drm/d3drmtexture.cpp",
+    "../../../miniwin/src/d3drm/d3drmviewport.cpp",
+    "../../../miniwin/src/d3drm/d3drmrenderer.cpp",
+    "../../../miniwin/src/internal/meshutils.cpp",
+    "../../../miniwin/src/d3drm/backends/software/renderer.cpp"
+  ],
+  "publicIncludePaths": [
+    "../../../miniwin/include"
+  ],
+  "includePaths": [
+    "../../../miniwin/src/internal",
+    "../../../miniwin/src/d3drm/backends/sdl3gpu/shaders/generated"
+  ],
+  "projectReferences": [
+    "../../deps/SDL3"
+  ],
+  "defines": [
+    "XBOXOG",
+    "MINIWIN",
+    "NDEBUG",
+    "USE_SOFTWARE_RENDER"
+  ],
+  "cppStandard": "c++17",
+  "outputDir": "out"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "iniparser",
+  "type": "library",
+  "configuration": "release",
+  "sources": [
+    "../../deps/iniparser/src/iniparser.c",
+    "../../deps/iniparser/src/dictionary.c"
+  ],
+  "publicIncludePaths": [
+    "../../deps/iniparser/src"
+  ],
+  "defines": [
+    "NDEBUG"
+  ],
+  "compileFlags": [
+    "-U_WIN32"
+  ],
+  "cppStandard": "c++17",
+  "outputDir": "out"
+}

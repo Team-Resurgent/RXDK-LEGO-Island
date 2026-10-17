@@ -1,0 +1,5 @@
+# Fetched by gen_manifest.py
+deps/
+# RXDK build output
+out/
+libs/*/out/

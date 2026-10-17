@@ -1,0 +1,19 @@
+{
+  "name": "libsmacker",
+  "type": "library",
+  "configuration": "release",
+  "sources": [
+    "../../../3rdparty/libsmacker/smacker.c"
+  ],
+  "publicIncludePaths": [
+    "../../../3rdparty/libsmacker"
+  ],
+  "defines": [
+    "NDEBUG"
+  ],
+  "compileFlags": [
+    "-U_WIN32"
+  ],
+  "cppStandard": "c++17",
+  "outputDir": "out"
+}
