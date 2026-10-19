@@ -19,6 +19,7 @@
   ],
   "libraries": [
     "libd3d8.lib",
+    "libxgraphics.lib",
     "libdsound.lib",
     "libxapi.lib",
     "libcpp.lib",

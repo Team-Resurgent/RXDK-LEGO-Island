@@ -17,6 +17,8 @@
     "../../../miniwin/src/d3drm/d3drmviewport.cpp",
     "../../../miniwin/src/d3drm/d3drmrenderer.cpp",
     "../../../miniwin/src/internal/meshutils.cpp",
+    "../../../miniwin/src/d3drm/backends/xboxd3d8/actual.cpp",
+    "../../../miniwin/src/d3drm/backends/xboxd3d8/renderer.cpp",
     "../../../miniwin/src/d3drm/backends/software/renderer.cpp"
   ],
   "publicIncludePaths": [
@@ -33,6 +35,7 @@
     "XBOXOG",
     "MINIWIN",
     "NDEBUG",
+    "USE_XBOX_D3D8",
     "USE_SOFTWARE_RENDER"
   ],
   "cppStandard": "c++17",

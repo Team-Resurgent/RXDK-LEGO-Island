@@ -144,6 +144,15 @@ if(WIN32 AND NOT WINDOWS_STORE)
   list(APPEND GRAPHICS_BACKENDS USE_DIRECTX9)
 endif()
 
+if(XBOXOG)
+  # The original Xbox's Direct3D 8, on the device SDL's xboxog video driver creates.
+  target_sources(miniwin PRIVATE
+    src/d3drm/backends/xboxd3d8/actual.cpp
+    src/d3drm/backends/xboxd3d8/renderer.cpp
+  )
+  list(APPEND GRAPHICS_BACKENDS USE_XBOX_D3D8)
+endif()
+
 if(WINDOWS_STORE)
   add_compile_definitions(WINDOWS_STORE)
 endif()

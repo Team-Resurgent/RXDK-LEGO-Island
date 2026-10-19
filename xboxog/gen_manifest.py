@@ -66,6 +66,7 @@ CONDITIONS = {
     "USE_SOFTWARE_RENDER IN_LIST GRAPHICS_BACKENDS": True,
     "USE_PALETTE_SW_RENDER IN_LIST GRAPHICS_BACKENDS": False,
     "ISLE_COMPILE_SHADERS": False,
+    "XBOXOG": True,
     "ISLE_BUILD_APP": True,  # the isle title
     "DOS": False,
     "ANDROID": False,
@@ -101,6 +102,7 @@ C_NO_WIN32 = ["-U_WIN32"]
 # The SDK libraries the title links, as the SDL3 port's own titles do.
 SDK_LIBRARIES = [
     "libd3d8.lib",
+    "libxgraphics.lib",  # XGSwizzleRect, for textures
     "libdsound.lib",
     "libxapi.lib",
     "libcpp.lib",
@@ -289,7 +291,8 @@ def main():
         public_include_paths=[j("miniwin", "include")],
         include_paths=[j("miniwin", "src", "internal"),
                        j("miniwin", "src", "d3drm", "backends", "sdl3gpu", "shaders", "generated")],
-        defines=COMMON_DEFINES + ["USE_SOFTWARE_RENDER"],
+        # Direct3D 8 first, the software renderer as the fallback.
+        defines=COMMON_DEFINES + ["USE_XBOX_D3D8", "USE_SOFTWARE_RENDER"],
         references=[sdl3]))
 
     # lego1.

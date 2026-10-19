@@ -17,6 +17,9 @@
 #ifdef USE_SDL_GPU
 #include "d3drmrenderer_sdl3gpu.h"
 #endif
+#ifdef USE_XBOX_D3D8
+#include "d3drmrenderer_xboxd3d8.h"
+#endif
 #ifdef USE_SOFTWARE_RENDER
 #include "d3drmrenderer_software.h"
 #endif
@@ -115,6 +118,11 @@ Direct3DRMRenderer* CreateDirect3DRMRenderer(
 		return DirectX9Renderer::Create(DDSDesc.dwWidth, DDSDesc.dwHeight);
 	}
 #endif
+#ifdef USE_XBOX_D3D8
+	if (SDL_memcmp(guid, &XboxD3D8_GUID, sizeof(GUID)) == 0) {
+		return XboxD3D8Renderer::Create(DDSDesc.dwWidth, DDSDesc.dwHeight);
+	}
+#endif
 #ifdef USE_GXM
 	if (SDL_memcmp(guid, &GXM_GUID, sizeof(GUID)) == 0) {
 		return GXMRenderer::Create(DDSDesc.dwWidth, DDSDesc.dwHeight, d3d->GetMSAASamples());
@@ -152,6 +160,9 @@ void Direct3DRMRenderer_EnumDevices(const IDirect3DMiniwin* d3d, LPD3DENUMDEVICE
 #endif
 #ifdef USE_DIRECTX9
 	DirectX9Renderer_EnumDevice(cb, ctx);
+#endif
+#ifdef USE_XBOX_D3D8
+	XboxD3D8Renderer_EnumDevice(cb, ctx);
 #endif
 #ifdef USE_PALETTE_SW_RENDER
 	Direct3DRMPaletteSW_EnumDevice(cb, ctx);
