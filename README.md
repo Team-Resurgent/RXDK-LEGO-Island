@@ -21,6 +21,12 @@ audio, controllers and threads.
 intro movies, the Information Center and the island. It plays with a controller, or with a USB mouse and
 keyboard.
 
+<p align="center">
+  <img src="xboxog/screenshot.png" width="640" alt="The Information Center running on an original Xbox">
+  <br>
+  <i>The Information Center on an original Xbox, captured with RXDK's <code>xbcapture</code>.</i>
+</p>
+
 **An existing copy of LEGO Island is required.**
 
 ## Installing the game files
