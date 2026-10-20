@@ -45,9 +45,11 @@ title's own storage on the hard disk, `T:\isledecomp\isle\`.
 | Back | Escape (skip) |
 | Start | Pause |
 
+A USB mouse in any controller port (through a port-to-USB adapter) moves the cursor and clicks too.
+
 ## Building
 
-You need [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.8 or later, and Python 3.
+You need [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.11 or later, and Python 3.
 
 ```bash
 python xboxog/gen_manifest.py

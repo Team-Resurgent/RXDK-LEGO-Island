@@ -866,7 +866,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 		g_lastMouseX = event->motion.x;
 		g_lastMouseY = event->motion.y;
 
-#ifdef __DJGPP__
+#if defined(__DJGPP__) || defined(XBOXOG)
+		// No system cursor to show: keep drawing the game's own and move it.
 		if (VideoManager()) {
 			VideoManager()->MoveCursor(Min((MxS32) g_lastMouseX, 639), Min((MxS32) g_lastMouseY, 479));
 		}

@@ -35,7 +35,7 @@ LIBS = os.path.join(HERE, "libs")
 INIPARSER_REPO = "https://gitlab.com/iniparser/iniparser.git"
 INIPARSER_TAG = "v4.2.6"  # as CMakeLists.txt
 SDL3_REPO = "https://github.com/Team-Resurgent/RXDK-SDL3.git"
-SDL3_COMMIT = "052b09f01dc655eb36f100d2110f4e7a2239b24f"
+SDL3_COMMIT = "82af4b779a7716aa8862d01a232a0aabe653a9ae"
 
 # The value, on the original Xbox, of every condition guarding a source list
 # this script reads. Keys are CMake if() conditions as written, minus outer

@@ -15,6 +15,6 @@ void XBOXOG_SetupDefaultConfigOverrides(dictionary* p_dictionary)
 	// T: is the title's own persistent storage on the hard disk.
 	iniparser_set(p_dictionary, "isle:savepath", "T:\\");
 
-	// Controller only: show the cursor the sticks move.
+	// There is no system cursor, so the game draws its own for the sticks and a USB mouse.
 	iniparser_set(p_dictionary, "isle:Draw Cursor", "true");
 }
