@@ -18,8 +18,8 @@ original Xbox. It runs on the console with [RXDK SDL3](https://github.com/Team-R
 audio, controllers and threads.
 
 **Status: work in progress.** The game runs on the console and on xemu, drawn with the Xbox's Direct3D 8: the
-intro movies, the Information Center and its 3D scenes. It plays with a controller or a USB mouse. The rest of the
-island has not been tested yet.
+intro movies, the Information Center and the island. It plays with a controller, or with a USB mouse and
+keyboard.
 
 **An existing copy of LEGO Island is required.**
 
@@ -46,7 +46,15 @@ title's own storage on the hard disk, `T:\isledecomp\isle\`.
 | Back | Escape (skip) |
 | Start | Pause |
 
-A USB mouse in any controller port (through a port-to-USB adapter) moves the cursor and clicks too.
+### Mouse and keyboard
+
+A USB mouse and a USB keyboard work too: plug each into any controller port through a port-to-USB adapter,
+alongside or instead of a controller. They are picked up when plugged in, including while the game runs.
+
+| Device | Use |
+|---|---|
+| Mouse | Moves the cursor and clicks, as on the PC |
+| Keyboard | The PC game's keyboard controls |
 
 ## Building
 
