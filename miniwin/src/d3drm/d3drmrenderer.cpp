@@ -79,7 +79,7 @@ Direct3DRMRenderer* CreateDirect3DRMRenderer(
 #endif
 #ifdef USE_SOFTWARE_RENDER
 	if (SDL_memcmp(guid, &SOFTWARE_GUID, sizeof(GUID)) == 0) {
-		return new Direct3DRMSoftwareRenderer(DDSDesc.dwWidth, DDSDesc.dwHeight);
+		return new Direct3DRMSoftwareRenderer(DDSDesc.dwWidth, DDSDesc.dwHeight, d3d->GetLightingModel());
 	}
 #endif
 #ifdef USE_OPENGLES3
@@ -89,7 +89,8 @@ Direct3DRMRenderer* CreateDirect3DRMRenderer(
 			DDSDesc.dwHeight,
 			d3d->GetMSAASamples(),
 			d3d->GetAnisotropic(),
-			d3d->GetLightingModel()
+			d3d->GetLightingModel(),
+			d3d->GetRenderStyle()
 		);
 	}
 #endif
@@ -99,7 +100,8 @@ Direct3DRMRenderer* CreateDirect3DRMRenderer(
 			DDSDesc.dwWidth,
 			DDSDesc.dwHeight,
 			d3d->GetAnisotropic(),
-			d3d->GetLightingModel()
+			d3d->GetLightingModel(),
+			d3d->GetRenderStyle()
 		);
 	}
 #endif

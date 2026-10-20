@@ -281,6 +281,7 @@ IsleApp::IsleApp()
 	m_msaaSamples = 0;
 	m_anisotropic = 16.0f;
 	m_lightingModel = 0;
+	m_renderStyle = 0;
 	m_activeInBackground = FALSE;
 }
 
@@ -884,6 +885,11 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 		float x = event->tfinger.x * g_targetWidth;
 		float y = event->tfinger.y * g_targetHeight;
+		bool emulateMouse = true;
+#ifdef __EMSCRIPTEN__
+		Emscripten_ClampToRenderArea(x, y);
+		emulateMouse = Emscripten_DidTouchStartInRenderArea(event);
+#endif
 
 		if (InputManager()) {
 			MxU8 modifier = LegoEventNotificationParam::c_lButtonState;
@@ -891,7 +897,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 				modifier |= LegoEventNotificationParam::c_motionHandled;
 			}
 
-			InputManager()->QueueEvent(c_notificationMouseMove, modifier, x, y, 0);
+			if (emulateMouse) {
+				InputManager()->QueueEvent(c_notificationMouseMove, modifier, x, y, 0);
+			}
 		}
 
 		g_lastMouseX = x;
@@ -922,10 +930,18 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 		float x = event->tfinger.x * g_targetWidth;
 		float y = event->tfinger.y * g_targetHeight;
+		bool emulateMouse = true;
+#ifdef __EMSCRIPTEN__
+		Emscripten_ClampToRenderArea(x, y);
+		emulateMouse = Emscripten_DidTouchStartInRenderArea(event);
+#endif
 
 		if (InputManager()) {
 			InputManager()->HandleTouchEvent(event, g_isle->GetTouchScheme());
-			InputManager()->QueueEvent(c_notificationButtonDown, LegoEventNotificationParam::c_lButtonState, x, y, 0);
+			if (emulateMouse) {
+				InputManager()
+					->QueueEvent(c_notificationButtonDown, LegoEventNotificationParam::c_lButtonState, x, y, 0);
+			}
 		}
 
 		g_lastMouseX = x;
@@ -957,12 +973,19 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 		float x = event->tfinger.x * g_targetWidth;
 		float y = event->tfinger.y * g_targetHeight;
+		bool emulateMouse = true;
+#ifdef __EMSCRIPTEN__
+		Emscripten_ClampToRenderArea(x, y);
+		emulateMouse = Emscripten_DidTouchStartInRenderArea(event);
+#endif
 
 		g_isle->DetectDoubleTap(event->tfinger);
 
 		if (InputManager()) {
 			InputManager()->HandleTouchEvent(event, g_isle->GetTouchScheme());
-			InputManager()->QueueEvent(c_notificationButtonUp, 0, x, y, 0);
+			if (emulateMouse) {
+				InputManager()->QueueEvent(c_notificationButtonUp, 0, x, y, 0);
+			}
 		}
 		break;
 	}
@@ -1376,6 +1399,7 @@ bool IsleApp::LoadConfig()
 		iniparser_set(dict, "isle:MSAA", SDL_itoa(m_msaaSamples, buf, 10));
 		iniparser_set(dict, "isle:Anisotropic", SDL_itoa(m_anisotropic, buf, 10));
 		iniparser_set(dict, "isle:Lighting Model", SDL_itoa(m_lightingModel, buf, 10));
+		iniparser_set(dict, "isle:Render Style", SDL_itoa(m_renderStyle, buf, 10));
 		iniparser_set(dict, "isle:Active in background", m_activeInBackground ? "true" : "false");
 
 #ifdef EXTENSIONS
@@ -1471,6 +1495,7 @@ bool IsleApp::LoadConfig()
 	m_videoParam.SetMSAASamples((m_msaaSamples = iniparser_getint(dict, "isle:MSAA", m_msaaSamples)));
 	m_videoParam.SetAnisotropic((m_anisotropic = iniparser_getdouble(dict, "isle:Anisotropic", m_anisotropic)));
 	m_videoParam.SetLightingModel((m_lightingModel = iniparser_getint(dict, "isle:Lighting Model", m_lightingModel)));
+	m_videoParam.SetRenderStyle((m_renderStyle = iniparser_getint(dict, "isle:Render Style", m_renderStyle)));
 	m_activeInBackground = iniparser_getboolean(dict, "isle:Active in Background", m_activeInBackground);
 
 	const char* deviceId = iniparser_getstring(dict, "isle:3D Device ID", NULL);
