@@ -44,5 +44,8 @@
     "MA_NO_RUNTIME_LINKING"
   ],
   "cppStandard": "c++17",
-  "outputDir": "out"
+  "outputDir": "out",
+  "deployPaths": [
+    "LEGO=game/LEGO"
+  ]
 }

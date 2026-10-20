@@ -11,18 +11,26 @@ platform switch upstream has to be decided here rather than silently guessed.
 It also fetches the two dependencies the CMake build downloads (iniparser at
 the same tag, and the RXDK SDL3 port), into xboxog/deps/.
 
-    python xboxog/gen_manifest.py            # fetch deps if missing, write manifests
-    python xboxog/gen_manifest.py --no-fetch # only write manifests
+    python xboxog/gen_manifest.py              # fetch deps if missing, write manifests
+    python xboxog/gen_manifest.py --no-fetch   # only write manifests
+    python xboxog/gen_manifest.py --disc G:\\  # also copy the game files from a disc
 
 Then build the XBE (and ISO) with the RXDK engine:
 
-    rxdk build --project-root xboxog
+    <RXDK tools>/Rxdk.Cli build --project-root xboxog
+
+With --disc, the game's files are copied from the LEGO Island disc (or a copy of
+it) into xboxog/game/LEGO, which git ignores, and every build packs them into the
+ISO next to the XBE: xboxog/out/XISO/isle.iso is then playable, and
+xboxog/out/Build/isle/ is the folder to copy to a console. Without them the ISO
+holds only the XBE.
 """
 
 import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -118,7 +126,8 @@ def cmake_commands(path):
     """Yield (name, args, conditions) for each command in a CMake file, where
     conditions is the list of if()/elseif()/else() conditions (as
     (text, negated-predecessors) pairs) enclosing it."""
-    text = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
     text = re.sub(r"#[^\n]*", "", text)
     stack = []  # [(condition, [previous conditions of this if chain])]
     pos = 0
@@ -248,11 +257,61 @@ def library(name, project_dir, sources, include_paths=(), public_include_paths=(
     return m
 
 
+# Where the build finds the game's files, inside the image next to the XBE, and
+# the folders of the disc they come from (the title looks in D:\LEGO\).
+GAME_DIR = os.path.join(HERE, "game")
+DISC_FOLDERS = [
+    (("LEGO", "Scripts"), ("LEGO", "Scripts")),
+    (("DATA", "disk", "LEGO", "data"), ("LEGO", "data")),
+]
+
+
+def find_case_insensitive(root, parts):
+    """The path under root whose components match parts ignoring case (discs differ: Lego, LEGO)."""
+    path = root
+    for part in parts:
+        try:
+            names = os.listdir(path)
+        except OSError:
+            return None
+        match = next((n for n in names if n.lower() == part.lower()), None)
+        if match is None:
+            return None
+        path = os.path.join(path, match)
+    return path
+
+
+def copy_game_files(disc):
+    """Copy the game's files from a LEGO Island disc into xboxog/game/LEGO (git ignores it)."""
+    copied = skipped = 0
+    for src_parts, dst_parts in DISC_FOLDERS:
+        src = find_case_insensitive(disc, src_parts)
+        if src is None or not os.path.isdir(src):
+            sys.exit(f"{disc} is not a LEGO Island disc: no {os.path.join(*src_parts)}")
+        dst = os.path.join(GAME_DIR, *dst_parts)
+        for dirpath, _, files in os.walk(src):
+            out_dir = os.path.join(dst, os.path.relpath(dirpath, src))
+            os.makedirs(out_dir, exist_ok=True)
+            for name in files:
+                a, b = os.path.join(dirpath, name), os.path.join(out_dir, name)
+                if os.path.exists(b) and os.path.getsize(a) == os.path.getsize(b):
+                    skipped += 1
+                    continue
+                shutil.copyfile(a, b)
+                copied += 1
+    print(f"game files: {copied} copied, {skipped} already there -> {os.path.join(GAME_DIR, 'LEGO')}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--no-fetch", action="store_true", help="do not fetch missing dependencies")
+    ap.add_argument("--disc", metavar="PATH",
+                    help="copy the game files from this LEGO Island disc (or copy of it) for the ISO")
     args = ap.parse_args()
+
+    if args.disc:
+        copy_game_files(args.disc)
 
     iniparser = os.path.join(DEPS, "iniparser")
     sdl3 = os.path.join(DEPS, "SDL3")
@@ -326,6 +385,8 @@ def main():
         "defines": COMMON_DEFINES + ["ISLE_APP"] + MINIAUDIO_DEFINES,
         "cppStandard": "c++17",
         "outputDir": "out",
+        # The game's files (see --disc), packed next to the XBE when present.
+        "deployPaths": ["LEGO=game/LEGO"],
     }
     write_manifest(HERE, title)
 

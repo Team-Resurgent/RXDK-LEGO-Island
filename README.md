@@ -84,14 +84,14 @@ From a clone of this repository (the `xboxog` branch), generate the build manife
 `Rxdk.Cli` from that folder. On Windows:
 
 ```bash
-python xboxog/gen_manifest.py
+python xboxog/gen_manifest.py --disc G:\
 "C:/ProgramData/RXDK/tools/Rxdk.Cli.exe" build --project-root xboxog
 ```
 
 On Linux (on macOS, use the macOS folder above):
 
 ```bash
-python3 xboxog/gen_manifest.py
+python3 xboxog/gen_manifest.py --disc /path/to/disc
 ~/.local/share/rxdk/tools/Rxdk.Cli build --project-root xboxog
 ```
 
@@ -105,30 +105,20 @@ target's source list from CMake and evaluates the `if()` conditions around it fo
 value for stops it, so a new platform switch upstream gets decided rather than guessed. Re-run it after upstream
 changes.
 
-The build produces `xboxog/out/Build/isle/default.xbe`. It also writes `xboxog/out/XISO/isle.iso`, but that
-holds only the XBE, so it does not run as it is: the game files have to go next to it.
+`--disc` takes your LEGO Island disc, a mounted image of it or a copy of its files. It copies the game's files
+into `xboxog/game/LEGO` (git ignores that folder, so they never reach the repository), and from then on every
+build packs them in next to the XBE. Run it once; later `gen_manifest.py` runs keep the copy.
 
 ## Running it
 
-Make a folder with `default.xbe` and the `LEGO` folder described in
-[Installing the game files](#installing-the-game-files):
+The build puts a complete, playable copy of the game in two forms:
 
-```
-LEGO Island\
-  default.xbe
-  LEGO\Scripts\...
-  LEGO\data\...
-```
+- **`xboxog/out/XISO/isle.iso`** for xemu: load it as the disc.
+- **`xboxog/out/Build/isle/`** for a console: copy the folder to the hard disk (for example
+  `E:\Games\LEGO Island`) by FTP or with RXDK's `xbcp`, and launch `default.xbe` from your dashboard.
 
-- **On a console:** copy that folder to the hard disk (for example `E:\Games\LEGO Island`) by FTP or with
-  RXDK's `xbcp`, and launch `default.xbe` from your dashboard.
-- **On xemu:** pack the folder into an ISO and load it as the disc:
-
-  ```bash
-  "C:/ProgramData/RXDK/tools/xdvdfs.exe" pack "LEGO Island" isle.iso
-  ```
-
-  (`xdvdfs` is in the RXDK tools folder above on every system.)
+Without `--disc`, both hold only the XBE and the build warns that `game/LEGO` was not found. You can then add
+the game's files yourself, as in [Installing the game files](#installing-the-game-files).
 
 The Xbox platform is set up like the DOS port: miniwin, static libraries, and no extensions. It draws with a
 Direct3D 8 renderer (`miniwin/src/d3drm/backends/xboxd3d8`), with the software renderer as the fallback. Its

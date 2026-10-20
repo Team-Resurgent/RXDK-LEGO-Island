@@ -3,3 +3,5 @@ deps/
 # RXDK build output
 out/
 libs/*/out/
+# The game's files, copied from the disc by gen_manifest.py --disc (never committed)
+game/
