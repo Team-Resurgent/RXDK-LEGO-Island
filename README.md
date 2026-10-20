@@ -50,22 +50,40 @@ A USB mouse in any controller port (through a port-to-USB adapter) moves the cur
 
 ## Building
 
-You need, on Windows:
+You need:
 
-- [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.11 or later, installed by the RXDK extension for
-  [VS Code](https://github.com/Team-Resurgent/RXDK-VSCode) or [Visual Studio](https://github.com/Team-Resurgent/RXDK-VS20XX)
-  into `C:\ProgramData\RXDK`.
+- [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.11 or later. The RXDK extension for
+  [VS Code](https://github.com/Team-Resurgent/RXDK-VSCode) installs it on Windows, Linux or macOS (run
+  **Complete Setup** from its sidebar); the one for [Visual Studio](https://github.com/Team-Resurgent/RXDK-VS20XX)
+  installs it on Windows.
 - Python 3 and git.
 
-From a clone of this repository (the `xboxog` branch):
+RXDK installs its tools into a folder that depends on the system:
+
+| System | RXDK tools folder |
+|---|---|
+| Windows | `C:\ProgramData\RXDK\tools` |
+| Linux | `~/.local/share/rxdk/tools` (or `$XDG_DATA_HOME/rxdk/tools`) |
+| macOS | `~/Library/Application Support/RXDK/tools` |
+
+From a clone of this repository (the `xboxog` branch), generate the build manifests, then build with RXDK's
+`Rxdk.Cli` from that folder. On Windows:
 
 ```bash
 python xboxog/gen_manifest.py
-"C:/ProgramData/RXDK/engine/Rxdk.Cli.exe" build --project-root xboxog
+"C:/ProgramData/RXDK/tools/Rxdk.Cli.exe" build --project-root xboxog
+```
+
+On Linux (on macOS, use the macOS folder above):
+
+```bash
+python3 xboxog/gen_manifest.py
+~/.local/share/rxdk/tools/Rxdk.Cli build --project-root xboxog
 ```
 
 Or, after `gen_manifest.py`, open the `xboxog` folder in VS Code with the RXDK extension and build there. The first
-build compiles SDL3 and the game, which takes several minutes; later builds only recompile what changed.
+build compiles SDL3 and the game, which takes several minutes; later builds only recompile what changed. This
+port has so far been built on Windows; nothing in it is Windows-specific, so please report how it goes elsewhere.
 
 `gen_manifest.py` fetches the two dependencies the CMake build downloads (iniparser, and RXDK SDL3 in place of
 SDL3) into `xboxog/deps`, and writes the RXDK build manifests from the project's CMake files. It reads each
@@ -95,6 +113,8 @@ LEGO Island\
   ```bash
   "C:/ProgramData/RXDK/tools/xdvdfs.exe" pack "LEGO Island" isle.iso
   ```
+
+  (`xdvdfs` is in the RXDK tools folder above on every system.)
 
 The Xbox platform is set up like the DOS port: miniwin, static libraries, and no extensions. It draws with a
 Direct3D 8 renderer (`miniwin/src/d3drm/backends/xboxd3d8`), with the software renderer as the fallback. Its
