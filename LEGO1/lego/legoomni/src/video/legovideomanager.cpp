@@ -321,7 +321,11 @@ void LegoVideoManager::ToggleFPS(MxBool p_visible)
 // STUB: BETA10 0x100d69cc
 MxResult LegoVideoManager::Tickle()
 {
-#ifndef BETA10
+	// The original sleeps 30 ms a tick in 2D areas (the Information Center and its
+	// intro movies) to leave the CPU to other programs. The Xbox has none, and it
+	// presents on vsync, which paces the loop to the refresh by itself: a fixed
+	// sleep only knocks frames off the refresh and makes 10 fps movies judder.
+#if !defined(BETA10) && !defined(XBOXOG)
 	if (m_unk0x554 && !m_videoParam.Flags().GetFlipSurfaces() &&
 		TransitionManager()->GetTransitionType() == MxTransitionManager::e_idle) {
 		Sleep(30);

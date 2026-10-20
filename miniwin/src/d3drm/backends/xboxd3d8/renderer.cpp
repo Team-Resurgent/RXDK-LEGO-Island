@@ -126,6 +126,83 @@ static D3DTexture* UploadTexture(SDL_Surface* src)
 	return texture;
 }
 
+// Writes a 2D image into a linear texture of its own size, converting to A8R8G8B8
+// on the way: the movie and UI surfaces are 8-bit palettized, and a frame of a
+// movie arrives as a new version of the same surface many times a second, so this
+// is one pass with no intermediate surface. The palette's alpha is kept, and a
+// colour key becomes transparent, as SDL_ConvertSurface would make it.
+static bool FillLinearTexture(D3DTexture* texture, SDL_Surface* src)
+{
+	int pitch;
+	auto* dst = static_cast<Uint8*>(XB8_LockTexture(texture, &pitch));
+	if (!dst) {
+		return false;
+	}
+
+	Uint32 key;
+	const bool keyed = SDL_SurfaceHasColorKey(src) && SDL_GetSurfaceColorKey(src, &key);
+	SDL_Palette* palette = SDL_GetSurfacePalette(src);
+	bool ok = true;
+
+	if (src->format == SDL_PIXELFORMAT_INDEX8 && palette) {
+		Uint32 lut[256] = {};
+		for (int i = 0; i < palette->ncolors && i < 256; ++i) {
+			const SDL_Color& c = palette->colors[i];
+			lut[i] = (Uint32(c.a) << 24) | (Uint32(c.r) << 16) | (Uint32(c.g) << 8) | c.b;
+		}
+		if (keyed && key < 256) {
+			lut[key] &= 0x00FFFFFF;
+		}
+		for (int y = 0; y < src->h; ++y) {
+			const Uint8* in = static_cast<const Uint8*>(src->pixels) + y * src->pitch;
+			auto* out = reinterpret_cast<Uint32*>(dst + y * pitch);
+			for (int x = 0; x < src->w; ++x) {
+				out[x] = lut[in[x]];
+			}
+		}
+	}
+	else if (src->format == SDL_PIXELFORMAT_ARGB8888 && !keyed) {
+		for (int y = 0; y < src->h; ++y) {
+			std::memcpy(dst + y * pitch, static_cast<const Uint8*>(src->pixels) + y * src->pitch, src->w * 4);
+		}
+	}
+	else {
+		SDL_Surface* argb = SDL_ConvertSurface(src, SDL_PIXELFORMAT_ARGB8888);
+		if (argb) {
+			for (int y = 0; y < argb->h; ++y) {
+				std::memcpy(dst + y * pitch, static_cast<const Uint8*>(argb->pixels) + y * argb->pitch, argb->w * 4);
+			}
+			SDL_DestroySurface(argb);
+		}
+		else {
+			SDL_Log("SDL_ConvertSurface failed: %s", SDL_GetError());
+			ok = false;
+		}
+	}
+
+	XB8_UnlockTexture(texture);
+	return ok;
+}
+
+// A 2D image's texture: reused while the image keeps its size, so a new movie
+// frame is a refill rather than a new allocation.
+static D3DTexture* UploadLinearTexture(D3DTexture* reuse, int reuseW, int reuseH, SDL_Surface* src)
+{
+	D3DTexture* texture = reuse;
+	if (!texture || reuseW != src->w || reuseH != src->h) {
+		XB8_ReleaseTexture(reuse);
+		texture = XB8_CreateLinearTexture(src->w, src->h);
+		if (!texture) {
+			return nullptr;
+		}
+	}
+	if (!FillLinearTexture(texture, src)) {
+		XB8_ReleaseTexture(texture);
+		return nullptr;
+	}
+	return texture;
+}
+
 Uint32 XboxD3D8Renderer::GetTextureId(IDirect3DRMTexture* iTexture, bool isUI, float scaleX, float scaleY)
 {
 	auto texture = static_cast<Direct3DRMTextureImpl*>(iTexture);
@@ -135,8 +212,20 @@ Uint32 XboxD3D8Renderer::GetTextureId(IDirect3DRMTexture* iTexture, bool isUI, f
 		auto& tex = m_textures[i];
 		if (tex.texture == texture) {
 			if (tex.version != texture->m_version) {
-				XB8_ReleaseTexture(tex.d3dTexture);
-				tex.d3dTexture = UploadTexture(surface->m_surface);
+				if (isUI && tex.linear) {
+					tex.d3dTexture = UploadLinearTexture(
+						tex.d3dTexture,
+						static_cast<int>(tex.width),
+						static_cast<int>(tex.height),
+						surface->m_surface
+					);
+				}
+				else {
+					XB8_ReleaseTexture(tex.d3dTexture);
+					tex.d3dTexture = isUI ? UploadLinearTexture(nullptr, 0, 0, surface->m_surface)
+										  : UploadTexture(surface->m_surface);
+				}
+				tex.linear = isUI;
 				tex.version = texture->m_version;
 				tex.width = static_cast<float>(surface->m_surface->w);
 				tex.height = static_cast<float>(surface->m_surface->h);
@@ -145,7 +234,10 @@ Uint32 XboxD3D8Renderer::GetTextureId(IDirect3DRMTexture* iTexture, bool isUI, f
 		}
 	}
 
-	D3DTexture* newTexture = UploadTexture(surface->m_surface);
+	// 2D images go into linear textures of their own size; 3D textures stay
+	// swizzled power-of-two ones, which the meshes' wrapping coordinates need.
+	D3DTexture* newTexture =
+		isUI ? UploadLinearTexture(nullptr, 0, 0, surface->m_surface) : UploadTexture(surface->m_surface);
 	if (!newTexture) {
 		return NO_TEXTURE_ID;
 	}
@@ -154,7 +246,8 @@ Uint32 XboxD3D8Renderer::GetTextureId(IDirect3DRMTexture* iTexture, bool isUI, f
 		texture->m_version,
 		newTexture,
 		static_cast<float>(surface->m_surface->w),
-		static_cast<float>(surface->m_surface->h)
+		static_cast<float>(surface->m_surface->h),
+		isUI
 	};
 
 	for (Uint32 i = 0; i < m_textures.size(); ++i) {
@@ -307,10 +400,13 @@ void XboxD3D8Renderer::Draw2DImage(Uint32 textureId, const SDL_Rect& srcRect, co
 	if (textureId != NO_TEXTURE_ID) {
 		const auto& tex = m_textures[textureId];
 		texture = tex.d3dTexture;
-		u1 = srcRect.x / tex.width;
-		v1 = srcRect.y / tex.height;
-		u2 = (srcRect.x + srcRect.w) / tex.width;
-		v2 = (srcRect.y + srcRect.h) / tex.height;
+		// A linear texture is addressed in texels, a swizzled one from 0 to 1.
+		const float scaleU = tex.linear ? 1.0f : tex.width;
+		const float scaleV = tex.linear ? 1.0f : tex.height;
+		u1 = srcRect.x / scaleU;
+		v1 = srcRect.y / scaleV;
+		u2 = (srcRect.x + srcRect.w) / scaleU;
+		v2 = (srcRect.y + srcRect.h) / scaleV;
 	}
 
 	XB8_Draw2DImage(

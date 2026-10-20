@@ -93,6 +93,39 @@ D3DTexture* XB8_UploadTexture(SDL_Surface* surface)
 	return texture;
 }
 
+D3DTexture* XB8_CreateLinearTexture(int width, int height)
+{
+	D3DTexture* texture = nullptr;
+	if (FAILED(IDirect3DDevice8_CreateTexture(
+			g_device,
+			width,
+			height,
+			1,
+			0,
+			D3DFMT_LIN_A8R8G8B8,
+			D3DPOOL_MANAGED,
+			&texture
+		))) {
+		return nullptr;
+	}
+	return texture;
+}
+
+void* XB8_LockTexture(D3DTexture* texture, int* pitch)
+{
+	D3DLOCKED_RECT locked;
+	if (FAILED(IDirect3DTexture8_LockRect(texture, 0, &locked, nullptr, 0))) {
+		return nullptr;
+	}
+	*pitch = locked.Pitch;
+	return locked.pBits;
+}
+
+void XB8_UnlockTexture(D3DTexture* texture)
+{
+	IDirect3DTexture8_UnlockRect(texture, 0);
+}
+
 void XB8_ReleaseTexture(D3DTexture* texture)
 {
 	if (texture) {

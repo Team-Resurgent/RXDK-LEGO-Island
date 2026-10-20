@@ -37,6 +37,9 @@ struct XB8TextureCacheEntry {
 	// size the (power-of-two) texture has.
 	float width;
 	float height;
+	// A 2D image in a linear texture of the image's own size (see
+	// XB8_CreateLinearTexture); its texture coordinates are in texels.
+	bool linear;
 };
 
 struct XB8MeshCacheEntry {
@@ -55,6 +58,12 @@ void XB8_Shutdown();
 // Uploads an ARGB8888 surface whose sides are powers of two.
 D3DTexture* XB8_UploadTexture(SDL_Surface* argb8888);
 void XB8_ReleaseTexture(D3DTexture* texture);
+// A linear (unswizzled) A8R8G8B8 texture for a 2D image: any size, written
+// directly with no scaling or swizzling, addressed in texels and clamped.
+D3DTexture* XB8_CreateLinearTexture(int width, int height);
+// Level 0 for writing; waits for the GPU if it is still reading the texture.
+void* XB8_LockTexture(D3DTexture* texture, int* pitch);
+void XB8_UnlockTexture(D3DTexture* texture);
 bool XB8_UploadMesh(
 	const void* vertices,
 	uint32_t vertexCount,
