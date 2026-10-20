@@ -17,8 +17,9 @@ version of LEGO Island built on the [isledecomp](https://github.com/isledecomp/i
 original Xbox. It runs on the console with [RXDK SDL3](https://github.com/Team-Resurgent/RXDK-SDL3) for video,
 audio, controllers and threads.
 
-**Status: work in progress.** The game starts and runs on xemu with the software renderer, which is slow; a
-Direct3D 8 renderer is next. It has not yet been tested on a console.
+**Status: work in progress.** The game runs on the console and on xemu, drawn with the Xbox's Direct3D 8: the
+intro movies, the Information Center and its 3D scenes. It plays with a controller or a USB mouse. The rest of the
+island has not been tested yet.
 
 **An existing copy of LEGO Island is required.**
 
@@ -49,12 +50,22 @@ A USB mouse in any controller port (through a port-to-USB adapter) moves the cur
 
 ## Building
 
-You need [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.11 or later, and Python 3.
+You need, on Windows:
+
+- [RXDK](https://github.com/Team-Resurgent/RXDK-Tools) v1.3.11 or later, installed by the RXDK extension for
+  [VS Code](https://github.com/Team-Resurgent/RXDK-VSCode) or [Visual Studio](https://github.com/Team-Resurgent/RXDK-VS20XX)
+  into `C:\ProgramData\RXDK`.
+- Python 3 and git.
+
+From a clone of this repository (the `xboxog` branch):
 
 ```bash
 python xboxog/gen_manifest.py
-rxdk build --project-root xboxog
+"C:/ProgramData/RXDK/engine/Rxdk.Cli.exe" build --project-root xboxog
 ```
+
+Or, after `gen_manifest.py`, open the `xboxog` folder in VS Code with the RXDK extension and build there. The first
+build compiles SDL3 and the game, which takes several minutes; later builds only recompile what changed.
 
 `gen_manifest.py` fetches the two dependencies the CMake build downloads (iniparser, and RXDK SDL3 in place of
 SDL3) into `xboxog/deps`, and writes the RXDK build manifests from the project's CMake files. It reads each
@@ -62,10 +73,32 @@ target's source list from CMake and evaluates the `if()` conditions around it fo
 value for stops it, so a new platform switch upstream gets decided rather than guessed. Re-run it after upstream
 changes.
 
-The build produces `xboxog/out/Build/isle/default.xbe` and `xboxog/out/XISO/isle.iso` (without the game files).
+The build produces `xboxog/out/Build/isle/default.xbe`. It also writes `xboxog/out/XISO/isle.iso`, but that
+holds only the XBE, so it does not run as it is: the game files have to go next to it.
 
-The Xbox platform is configured as the DOS port is: miniwin with the software renderer, static libraries, and no
-extensions. Its settings are in `ISLE/xboxog/config.cpp`.
+## Running it
+
+Make a folder with `default.xbe` and the `LEGO` folder described in
+[Installing the game files](#installing-the-game-files):
+
+```
+LEGO Island\
+  default.xbe
+  LEGO\Scripts\...
+  LEGO\data\...
+```
+
+- **On a console:** copy that folder to the hard disk (for example `E:\Games\LEGO Island`) by FTP or with
+  RXDK's `xbcp`, and launch `default.xbe` from your dashboard.
+- **On xemu:** pack the folder into an ISO and load it as the disc:
+
+  ```bash
+  "C:/ProgramData/RXDK/tools/xdvdfs.exe" pack "LEGO Island" isle.iso
+  ```
+
+The Xbox platform is set up like the DOS port: miniwin, static libraries, and no extensions. It draws with a
+Direct3D 8 renderer (`miniwin/src/d3drm/backends/xboxd3d8`), with the software renderer as the fallback. Its
+settings are in `ISLE/xboxog/config.cpp`.
 
 ---
 
